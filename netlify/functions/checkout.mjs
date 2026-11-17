@@ -83,7 +83,7 @@ export default async (req) => {
       redirectUrl,
       webhookUrl: `${site}/.netlify/functions/mollie-webhook`,
       locale: en ? 'en_US' : 'nl_NL',
-      metadata: { i: meta, s: ship, k: klant } // Mollie staat max 1 KB toe
+      metadata: { i: meta, s: ship, k: klant, l: en ? 'en' : 'nl' } // Mollie staat max 1 KB toe
     })
   });
   const pay = await res.json();
