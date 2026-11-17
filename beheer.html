@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Beheer · Staaf</title>
+<link rel="icon" href="/img/favicon.png">
+<link rel="stylesheet" href="/style.css">
+<style>
+  body{font-size:16px}
+  .wrap{max-width:1180px;margin:0 auto;padding:28px var(--gut) 140px}
+  .top{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;border-bottom:1px solid var(--ink);padding-bottom:14px;margin-bottom:22px}
+  .top img{width:150px}
+  .tabs{display:flex;gap:22px;flex-wrap:wrap}
+  .tabs button{background:none;border:0;padding:6px 0;font:600 11px/1 var(--sans);letter-spacing:.14em;text-transform:uppercase;color:var(--ink3);border-bottom:2px solid transparent}
+  .tabs button.on{color:var(--ink);border-color:var(--or)}
+  .tools{display:flex;gap:10px;flex-wrap:wrap;margin:0 0 16px}
+  .tools input,.tools select{font:inherit;padding:9px 12px;border:1px solid #cfcfcf;background:#fff}
+  .tools input{flex:1;min-width:200px}
+  table{width:100%;border-collapse:collapse}
+  td,th{padding:8px 8px;border-bottom:1px solid var(--line);vertical-align:middle;text-align:left}
+  th{font:600 10px/1.4 var(--sans);letter-spacing:.14em;text-transform:uppercase;color:var(--ink2)}
+  td img{width:54px;height:54px;object-fit:contain;background:var(--wall)}
+  td .t{font-weight:600}
+  td .s{font-size:13px;color:var(--ink2)}
+  td select,td input{font:inherit;padding:7px 8px;border:1px solid #cfcfcf;background:#fff;width:100%}
+  td input.num{width:110px}
+  tr.changed td{background:#fff6ef}
+  tr.edit td{background:var(--wall)}
+  .grid2{display:grid;grid-template-columns:repeat(4,1fr);gap:10px 14px}
+  .grid2 .field{margin:0}
+  .mini{background:none;border:0;font:600 10px/1 var(--sans);letter-spacing:.12em;text-transform:uppercase;text-decoration:underline;color:var(--ink2);padding:6px 0}
+  .bar{position:fixed;left:0;right:0;bottom:0;background:var(--ink);color:#fff;padding:14px var(--gut);display:flex;gap:16px;align-items:center;justify-content:center;z-index:20}
+  .bar .btn{background:var(--or);padding:14px 22px}
+  .bar .btn.ghost{background:none;box-shadow:inset 0 0 0 1px #fff}
+  .login{max-width:380px;margin:12vh auto}
+  .ok{color:#1d7a35}
+  .sale{padding:12px 0;border-bottom:1px solid var(--line);font-size:15px}
+  .sale b{font-family:var(--sans);font-size:13px}
+  .chips{display:flex;gap:8px;flex-wrap:wrap}
+  .chips label{display:flex;gap:6px;align-items:center;font-size:14px}
+  .previews{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+  .previews img{height:90px;width:auto;background:var(--wall)}
+  @media (max-width:760px){.grid2{grid-template-columns:1fr 1fr} .hide-s{display:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div id="login" class="login">
+    <img src="/img/staaf.webp" alt="Staaf" width="240" style="margin-bottom:20px">
+    <h1 class="h2">Beheer</h1>
+    <form id="lf">
+      <label class="field"><span>Wachtwoord</span><input type="password" name="pw" autocomplete="current-password" required></label>
+      <button class="btn wide">Inloggen</button>
+      <p class="msg err" id="lerr" hidden></p>
+    </form>
+  </div>
+
+  <div id="app" hidden>
+    <div class="top">
+      <img src="/img/staaf.webp" alt="Staaf">
+      <div class="tabs" role="tablist">
+        <button data-tab="werken" class="on">Werken</button>
+        <button data-tab="prints">Prints</button>
+        <button data-tab="nieuw">Nieuw werk</button>
+        <button data-tab="verkopen">Verkopen</button>
+      </div>
+      <a href="/" class="textlink">Naar de site</a>
+    </div>
+
+    <section data-pane="werken">
+      <div class="tools">
+        <input id="q" placeholder="Zoek op titel">
+        <select id="fs"><option value="">Alle reeksen</option></select>
+        <select id="fst"><option value="">Elke status</option><option>beschikbaar</option><option>gereserveerd</option><option>verkocht</option><option>niet te koop</option></select>
+      </div>
+      <table><thead><tr><th></th><th>Werk</th><th style="width:170px">Status</th><th style="width:130px">Prijs (€)</th><th class="hide-s" style="width:80px"></th></tr></thead><tbody id="rows"></tbody></table>
+    </section>
+
+    <section data-pane="prints" hidden>
+      <p class="note" style="margin:0 0 16px">Hoeveel prints er nog zijn, per formaat en uitvoering. Bij elke betaalde bestelling gaat het aantal vanzelf omlaag. Op de site is het aantal pas zichtbaar als er 10 of minder over zijn.</p>
+      <div id="prints"></div>
+    </section>
+
+    <section data-pane="nieuw" hidden>
+      <form id="nf" class="ask" style="margin:0">
+        <p class="h3">Nieuw werk toevoegen</p>
+        <p class="note" style="margin:0 0 16px">Het werk staat direct op de site. Foto's worden in je browser verkleind voordat ze worden opgeslagen.</p>
+        <div class="grid2">
+          <label class="field" style="grid-column:span 2"><span>Titel (Nederlands)</span><input name="tnl" required></label>
+          <label class="field" style="grid-column:span 2"><span>Titel (Engels)</span><input name="ten" placeholder="leeg = zelfde"></label>
+          <label class="field"><span>Techniek (NL)</span><input name="mnl" placeholder="olieverf op doek"></label>
+          <label class="field"><span>Techniek (EN)</span><input name="men" placeholder="oil on canvas"></label>
+          <label class="field"><span>Formaat</span><input name="size" placeholder="60 × 80 cm"></label>
+          <label class="field"><span>Prijs (€)</span><input name="price" inputmode="decimal" placeholder="leeg = op aanvraag"></label>
+          <label class="field"><span>Status</span><select name="status"><option>beschikbaar</option><option>gereserveerd</option><option>verkocht</option><option>niet te koop</option></select></label>
+          <div class="field" style="grid-column:span 3"><span>Reeks</span><div class="chips" id="nseries"></div></div>
+          <label class="field" style="grid-column:span 4;display:flex;gap:8px;align-items:center"><input type="checkbox" name="frame" checked style="width:auto"> Met zwarte houten baklijst</label>
+          <label class="field" style="grid-column:span 2"><span>Toelichting (NL, mag leeg)</span><textarea name="nnl"></textarea></label>
+          <label class="field" style="grid-column:span 2"><span>Toelichting (EN, mag leeg)</span><textarea name="nen"></textarea></label>
+          <label class="field" style="grid-column:span 4"><span>Foto's (eerste is de hoofdfoto)</span><input type="file" name="files" accept="image/*" multiple required></label>
+        </div>
+        <div class="previews" id="prev"></div>
+        <button class="btn" style="margin-top:16px">Toevoegen</button>
+        <p class="msg" id="nmsg" hidden></p>
+      </form>
+    </section>
+
+    <section data-pane="verkopen" hidden>
+      <p class="note" style="margin:0 0 16px">De laatste 50 betaalde bestellingen. Berichten via Reserveren en Stel een vraag vind je in Netlify onder Forms (en in je mail, als je meldingen aanzet).</p>
+      <div id="sales"></div>
+    </section>
+  </div>
+</div>
+<div class="bar" id="bar" hidden><span id="bartxt"></span><button class="btn ghost" id="undo">Ongedaan maken</button><button class="btn" id="save">Opslaan</button></div>
+
+<script>
+(function () {
+var PW = sessionStorage.getItem('staaf-pw') || '';
+var DATA, ST, ASOF, CH = {}, PCH = {}, OPEN = null;
+var $ = function (s, r) { return (r || document).querySelector(s); };
+var esc = function (s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
+var eur = function (c) { return c == null ? '' : String(c / 100).replace('.', ','); };
+var cents = function (s) { s = String(s).trim().replace(/\./g, '').replace(',', '.'); if (!s) return null; var n = Math.round(parseFloat(s) * 100); return isNaN(n) ? undefined : n; };
+
+function api(body) {
+  body.password = PW;
+  return fetch('/.netlify/functions/beheer', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
+    .then(function (r) { return r.json().then(function (j) { if (!r.ok) throw j; return j; }); });
+}
+function all() {
+  var base = DATA.works.concat(ST.extra || []);
+  return base.map(function (w) { var o = ST.works[w.slug] || {}, m = {}; for (var k in w) m[k] = w[k]; for (var j in o) m[j] = o[j]; m.extra = !DATA.works.some(function (d) { return d.slug === w.slug; }); return m; });
+}
+function cur(w) { var c = CH[w.slug] || {}, m = {}; for (var k in w) m[k] = w[k]; for (var j in c) m[j] = c[j]; return m; }
+function thumb(w) { var p = w.pics[0]; return (p.u || '/img/w/' + w.slug + '-0') + '-600.webp'; }
+function seriesName(id) { var s = DATA.series.filter(function (x) { return x.id === id; })[0]; return s ? s.nl : id; }
+
+function load() {
+  return Promise.all([fetch('/data.json', { cache: 'no-store' }).then(function (r) { return r.json(); }), api({ action: 'get' })]).then(function (x) {
+    DATA = x[0]; ST = x[1]; ASOF = ST.now; CH = {}; PCH = {};
+    $('#login').hidden = true; $('#app').hidden = false;
+    var fs = $('#fs'); if (fs.options.length === 1) DATA.series.forEach(function (s) { fs.add(new Option(s.nl, s.id)); });
+    $('#nseries').innerHTML = DATA.series.map(function (s) { return '<label><input type="checkbox" name="series" value="' + s.id + '" style="width:auto"> ' + esc(s.nl) + '</label>'; }).join('');
+    draw(); drawPrints(); drawSales(); bar();
+  });
+}
+
+function draw() {
+  var q = $('#q').value.toLowerCase(), fs = $('#fs').value, fst = $('#fst').value;
+  var list = all().filter(function (w) {
+    var c = cur(w);
+    if (q && (c.title.nl + ' ' + c.title.en).toLowerCase().indexOf(q) < 0) return false;
+    if (fs && (c.series || []).indexOf(fs) < 0) return false;
+    if (fst && c.status !== fst) return false;
+    return true;
+  });
+  $('#rows').innerHTML = list.map(function (w) {
+    var c = cur(w), changed = !!CH[w.slug];
+    var row = '<tr data-slug="' + esc(w.slug) + '" class="' + (changed ? 'changed' : '') + '"><td><img src="' + thumb(w) + '" alt="" loading="lazy"></td>' +
+      '<td><div class="t">' + esc(c.title.nl) + (c.hidden ? ' <span class="s">(verborgen)</span>' : '') + '</div><div class="s">' + esc((c.series || []).map(seriesName).join(', ')) + (c.size ? ' · ' + esc(c.size) : '') + (w.extra ? ' · zelf toegevoegd' : '') + '</div></td>' +
+      '<td><select data-f="status">' + ['beschikbaar', 'gereserveerd', 'verkocht', 'niet te koop'].map(function (s) { return '<option' + (s === c.status ? ' selected' : '') + '>' + s + '</option>'; }).join('') + '</select>' + (c.held ? '<div class="s">wordt nu afgerekend</div>' : '') + '</td>' +
+      '<td><input class="num" data-f="price" inputmode="decimal" value="' + eur(c.price) + '" placeholder="op aanvraag"></td>' +
+      '<td class="hide-s"><button class="mini" data-edit>' + (OPEN === w.slug ? 'Sluit' : 'Bewerk') + '</button></td></tr>';
+    if (OPEN === w.slug) {
+      row += '<tr class="edit" data-slug="' + esc(w.slug) + '"><td colspan="5"><div class="grid2">' +
+        '<label class="field" style="grid-column:span 2"><span>Titel NL</span><input data-f="title.nl" value="' + esc(c.title.nl) + '"></label>' +
+        '<label class="field" style="grid-column:span 2"><span>Titel EN</span><input data-f="title.en" value="' + esc(c.title.en) + '"></label>' +
+        '<label class="field"><span>Techniek NL</span><input data-f="medium.nl" value="' + esc(c.medium ? c.medium.nl : '') + '"></label>' +
+        '<label class="field"><span>Techniek EN</span><input data-f="medium.en" value="' + esc(c.medium ? c.medium.en : '') + '"></label>' +
+        '<label class="field"><span>Formaat</span><input data-f="size" value="' + esc(c.size || '') + '"></label>' +
+        '<div class="field"><span>Reeks</span><div class="chips">' + DATA.series.map(function (s) { return '<label><input type="checkbox" data-series="' + s.id + '" style="width:auto"' + ((c.series || []).indexOf(s.id) >= 0 ? ' checked' : '') + '> ' + esc(s.nl) + '</label>'; }).join('') + '</div></div>' +
+        '<label class="field" style="grid-column:span 2"><span>Toelichting NL</span><textarea data-f="note.nl">' + esc(c.note ? c.note.nl : '') + '</textarea></label>' +
+        '<label class="field" style="grid-column:span 2"><span>Toelichting EN</span><textarea data-f="note.en">' + esc(c.note ? c.note.en : '') + '</textarea></label>' +
+        '<label class="field" style="display:flex;gap:8px;align-items:center"><input type="checkbox" data-f="hidden" style="width:auto"' + (c.hidden ? ' checked' : '') + '> Verberg op de site</label>' +
+        '<div class="field" style="grid-column:span 3;align-self:center"><a class="mini" href="/werk/' + esc(w.slug) + '" target="_blank">Bekijk op de site ↗</a>' + (w.extra ? ' &nbsp; <button class="mini" data-remove style="color:#b00020">Verwijder dit werk</button>' : '') + '</div>' +
+        '</div></td></tr>';
+    }
+    return row;
+  }).join('') || '<tr><td colspan="5" class="s">Niets gevonden.</td></tr>';
+}
+
+function setField(slug, f, v) {
+  var w = all().filter(function (x) { return x.slug === slug; })[0];
+  var c = CH[slug] || (CH[slug] = {});
+  if (f.indexOf('.') > 0) {
+    var a = f.split('.'), base = c[a[0]] || (w[a[0]] ? JSON.parse(JSON.stringify(w[a[0]])) : { nl: '', en: '' });
+    base[a[1]] = v; c[a[0]] = base;
+  } else c[f] = v;
+  bar();
+}
+
+document.addEventListener('input', function (e) {
+  var t = e.target, tr = t.closest('tr[data-slug]');
+  if (!tr || !t.dataset.f) return;
+  var f = t.dataset.f, v = t.type === 'checkbox' ? t.checked : t.value;
+  if (f === 'price') { v = cents(v); if (v === undefined) return; }
+  setField(tr.dataset.slug, f, v);
+  $('tr[data-slug="' + tr.dataset.slug + '"]').classList.add('changed');
+});
+document.addEventListener('change', function (e) {
+  var t = e.target, tr = t.closest('tr[data-slug]');
+  if (tr && t.dataset.series != null) {
+    var boxes = tr.querySelectorAll('[data-series]'), s = [];
+    boxes.forEach(function (b) { if (b.checked) s.push(b.dataset.series); });
+    setField(tr.dataset.slug, 'series', s);
+  }
+  if (tr && t.tagName === 'SELECT' && t.dataset.f) { setField(tr.dataset.slug, t.dataset.f, t.value); tr.classList.add('changed'); }
+  if (t.dataset.pk) { PCH[t.dataset.pk] = Math.max(0, parseInt(t.value, 10) || 0); bar(); }
+});
+document.addEventListener('click', function (e) {
+  var b = e.target.closest('button'); if (!b) return;
+  if (b.dataset.tab) {
+    document.querySelectorAll('.tabs button').forEach(function (x) { x.classList.toggle('on', x === b); });
+    document.querySelectorAll('[data-pane]').forEach(function (p) { p.hidden = p.dataset.pane !== b.dataset.tab; });
+  }
+  if (b.hasAttribute('data-edit')) { var s = b.closest('tr').dataset.slug; OPEN = OPEN === s ? null : s; draw(); }
+  if (b.hasAttribute('data-remove')) {
+    var slug = b.closest('tr').dataset.slug;
+    if (!confirm('Dit werk helemaal van de site halen? Dit kun je niet ongedaan maken.')) return;
+    api({ action: 'remove', slug: slug }).then(load).catch(function (j) { alert(j.error || 'Mislukt'); });
+  }
+});
+['q', 'fs', 'fst'].forEach(function (id) { $('#' + id).addEventListener('input', draw); });
+
+function bar() {
+  var n = Object.keys(CH).length + Object.keys(PCH).length;
+  $('#bar').hidden = !n;
+  $('#bartxt').textContent = n + (n === 1 ? ' wijziging' : ' wijzigingen');
+}
+$('#undo').onclick = function () { CH = {}; PCH = {}; draw(); drawPrints(); bar(); };
+$('#save').onclick = function () {
+  var b = this; b.disabled = true; b.textContent = 'Bezig…';
+  api({ action: 'save', works: CH, prints: PCH, asOf: ASOF }).then(function (j) {
+    ST.works = j.works; ST.prints = j.prints; ASOF = j.now; CH = {}; PCH = {};
+    draw(); drawPrints(); bar(); b.disabled = false; b.textContent = 'Opslaan';
+    $('#bartxt').textContent = 'Opgeslagen'; $('#bar').hidden = false; $('#bar').querySelectorAll('.btn').forEach(function (x) { x.hidden = true; });
+    setTimeout(function () { $('#bar').querySelectorAll('.btn').forEach(function (x) { x.hidden = false; }); bar(); }, 1600);
+  }).catch(function (j) { alert((j && j.error) || 'Opslaan mislukt'); b.disabled = false; b.textContent = 'Opslaan'; });
+};
+
+function drawPrints() {
+  $('#prints').innerHTML = DATA.prints.map(function (p) {
+    return '<h2 class="h3" style="margin-top:22px">' + esc(p.title.nl) + '</h2><table><tbody>' + p.variants.map(function (v) {
+      var k = p.slug + '/' + v.id, n = k in PCH ? PCH[k] : ST.prints[k];
+      return '<tr class="' + (k in PCH ? 'changed' : '') + '"><td>' + v.format + ' · ' + (v.framed ? 'ingelijst' : 'los') + '</td><td class="s">€ ' + eur(v.price) + '</td><td style="width:140px"><input class="num" type="number" min="0" data-pk="' + k + '" value="' + n + '"></td></tr>';
+    }).join('') + '</tbody></table>';
+  }).join('');
+}
+function drawSales() {
+  var s = ST.sales || [];
+  $('#sales').innerHTML = s.length ? s.map(function (x) {
+    var d = new Date(x.at).toLocaleString('nl-NL', { dateStyle: 'medium', timeStyle: 'short' });
+    var items = x.items.map(function (i) {
+      if (i[0] === 'work') { var w = all().filter(function (y) { return y.slug === i[1]; })[0]; return 'Origineel: ' + (w ? w.title.nl : i[1]); }
+      return i[3] + '× print ' + i[1] + ' ' + i[2];
+    }).join(', ');
+    var k = x.klant || {};
+    return '<div class="sale"><b>' + d + (x.test ? ' · TEST' : '') + '</b> · € ' + esc(x.bedrag) + '<br>' + esc(items) + '<br><span class="s">' + esc(k.n) + ' · ' + esc(k.e) + (k.t ? ' · ' + esc(k.t) : '') + ' · ' + esc(x.bezorging === 'pickup' ? 'ophalen' : x.bezorging === 'deliver' ? 'bezorgen in overleg: ' + k.a : 'post: ' + k.a) + '</span></div>';
+  }).join('') : '<p class="note">Nog geen bestellingen.</p>';
+}
+
+/* nieuw werk */
+function resize(file, w) {
+  return new Promise(function (res, rej) {
+    var img = new Image();
+    img.onload = function () {
+      var s = Math.min(1, w / img.naturalWidth), c = document.createElement('canvas');
+      c.width = Math.round(img.naturalWidth * s); c.height = Math.round(img.naturalHeight * s);
+      c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+      c.toBlob(function (b) { if (!b) return rej(); var r = new FileReader(); r.onload = function () { res({ data: r.result.split(',')[1], r: img.naturalWidth / img.naturalHeight, w: img.naturalWidth }); }; r.readAsDataURL(b); }, 'image/webp', .82);
+    };
+    img.onerror = rej; img.src = URL.createObjectURL(file);
+  });
+}
+$('#nf').files.onchange = function () {
+  $('#prev').innerHTML = ''; Array.prototype.forEach.call(this.files, function (f) { var i = new Image(); i.src = URL.createObjectURL(f); $('#prev').appendChild(i); });
+};
+$('#nf').onsubmit = function (e) {
+  e.preventDefault();
+  var f = this, msg = $('#nmsg'), btn = f.querySelector('button');
+  var id = 'n' + Date.now().toString(36);
+  var files = Array.prototype.slice.call(f.files.files, 0, 12);
+  btn.disabled = true; msg.hidden = false; msg.className = 'msg';
+  var pics = [];
+  var chain = Promise.resolve();
+  files.forEach(function (file, n) {
+    chain = chain.then(function () {
+      msg.textContent = 'Foto ' + (n + 1) + ' van ' + files.length + ' verwerken…';
+      return resize(file, 2000).then(function (big) {
+        var sizes = [600, 1200, 2000].filter(function (s) { return s === 600 || big.w >= s * .8; });
+        var max = sizes[sizes.length - 1];
+        return sizes.reduce(function (p, s) {
+          return p.then(function () { return resize(file, s); }).then(function (x) { return api({ action: 'upload', name: id + '-' + n + '-' + s + '.webp', data: x.data }); });
+        }, Promise.resolve()).then(function () { pics.push({ r: big.r, max: max, u: '/beeld/' + id + '-' + n }); });
+      });
+    });
+  });
+  chain.then(function () {
+    var price = cents(f.price.value);
+    var series = Array.prototype.map.call(f.querySelectorAll('[name="series"]:checked'), function (x) { return x.value; });
+    msg.textContent = 'Opslaan…';
+    return api({ action: 'add', work: {
+      title: { nl: f.tnl.value, en: f.ten.value || f.tnl.value }, medium: f.mnl.value ? { nl: f.mnl.value, en: f.men.value || f.mnl.value } : undefined,
+      size: f.size.value, price: price === undefined ? null : price, status: f.status.value, series: series, frame: f.frame.checked,
+      note: f.nnl.value || f.nen.value ? { nl: f.nnl.value, en: f.nen.value } : null, pics: pics } });
+  }).then(function (j) {
+    msg.className = 'msg ok'; msg.innerHTML = 'Toegevoegd. <a href="/werk/' + j.slug + '" target="_blank">Bekijk op de site ↗</a>';
+    f.reset(); $('#prev').innerHTML = ''; btn.disabled = false; load();
+  }).catch(function (j) { msg.className = 'msg err'; msg.textContent = (j && j.error) || 'Er ging iets mis bij het toevoegen.'; btn.disabled = false; });
+};
+
+$('#lf').onsubmit = function (e) {
+  e.preventDefault(); PW = this.pw.value;
+  load().then(function () { sessionStorage.setItem('staaf-pw', PW); }).catch(function (j) { var m = $('#lerr'); m.textContent = (j && j.error) || 'Inloggen mislukt'; m.hidden = false; });
+};
+if (PW) load().catch(function () { sessionStorage.removeItem('staaf-pw'); PW = ''; });
+})();
+</script>
+</body>
+</html>
