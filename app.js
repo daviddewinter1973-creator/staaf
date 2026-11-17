@@ -10,8 +10,8 @@ var STR = {
     skip: 'Naar de inhoud', gallery: 'Galerie Staaf · Bloemgracht 158', other: 'English', cart: 'Winkelwagen',
     nav: ['Werk', 'Prints', 'In opdracht', 'Toen we daar zo zaten', 'Over Staaf'],
     heroKick: 'Galerie Staaf · Amsterdam', heroTitle: 'Schilderijen van Staaf',
-    heroLede: 'Staaf is de schildersnaam van David de Winter. Sinds 2005 werkt hij in zijn atelier en galerie aan de Bloemgracht. Hij schildert intuïtief, laag over laag, en vaak met een knipoog. Hieronder staat zijn werk: wat nog te koop is en wat al een thuis heeft.',
-    seeForSale: 'Bekijk wat te koop is', commission: 'Schilderij in opdracht',
+    heroLede: 'Staaf is de schildersnaam van David de Winter. Sinds 2005 werkt hij in zijn atelier en galerie aan de Bloemgracht. Hieronder staat Mokum in olie: de Amsterdamse olieverfschilderijen waar hij nu aan werkt. Ouder werk in acryl vind je bij de andere reeksen.',
+    seeForSale: 'Bekijk wat te koop is', allSeries: 'Alle reeksen', commission: 'Schilderij in opdracht',
     work: 'Werk', all: 'Alles', forSale: 'Te koop', sold: 'Verkocht', reserved: 'Gereserveerd', notForSale: 'Niet te koop',
     works: function (n) { return n === 1 ? '1 werk' : n + ' werken'; }, none: 'Hier staat (nog) niets. Kies een andere reeks.',
     allWorks: 'Alle werken', medium: 'Techniek', size: 'Formaat', frame: 'Lijst', frameYes: 'Zwarte houten baklijst', series: 'Reeks',
@@ -56,8 +56,8 @@ var STR = {
     skip: 'Skip to content', gallery: 'Galerie Staaf · Bloemgracht 158', other: 'Nederlands', cart: 'Cart',
     nav: ['Work', 'Prints', 'Commissions', 'Toen we daar zo zaten', 'About'],
     heroKick: 'Galerie Staaf · Amsterdam', heroTitle: 'Paintings by Staaf',
-    heroLede: 'Staaf is the painter name of David de Winter. Since 2005 he has worked in his studio and gallery on the Bloemgracht. He paints intuitively, layer upon layer, often with a wink. Below is his work: what is still for sale, and what has already found a home.',
-    seeForSale: 'See what is for sale', commission: 'Commission a painting',
+    heroLede: 'Staaf is the painter name of David de Winter. Since 2005 he has worked in his studio and gallery on the Bloemgracht. Below is Mokum in oil: the Amsterdam oil paintings he is working on now. Older work in acrylic is in the other series.',
+    seeForSale: 'See what is for sale', allSeries: 'All series', commission: 'Commission a painting',
     work: 'Work', all: 'All', forSale: 'For sale', sold: 'Sold', reserved: 'Reserved', notForSale: 'Not for sale',
     works: function (n) { return n === 1 ? '1 work' : n + ' works'; }, none: 'Nothing here (yet). Try another series.',
     allWorks: 'All work', medium: 'Medium', size: 'Size', frame: 'Frame', frameYes: 'Black wooden box frame', series: 'Series',
@@ -222,7 +222,8 @@ function card(w) {
 
 function filterState() {
   var q = new URLSearchParams(location.search);
-  var reeks = q.get(L === 'en' ? 'series' : 'reeks') || '';
+  // Zonder keuze: Mokum in olie, het werk van nu. 'alle' toont alles.
+  var reeks = q.get(L === 'en' ? 'series' : 'reeks') || DATA.series[0].id;
   var st = q.get('status') || '';
   if (!DATA.series.some(function (s) { return s.id === reeks; })) reeks = '';
   if (['te-koop', 'verkocht', 'for-sale', 'sold'].indexOf(st) < 0) st = '';
@@ -230,7 +231,7 @@ function filterState() {
 }
 function filterHref(reeks, status) {
   var q = [];
-  if (reeks) q.push((L === 'en' ? 'series=' : 'reeks=') + reeks);
+  if (reeks !== DATA.series[0].id) q.push((L === 'en' ? 'series=' : 'reeks=') + (reeks || (L === 'en' ? 'all' : 'alle')));
   if (status) q.push('status=' + (L === 'en' ? (status === 'te-koop' ? 'for-sale' : 'sold') : status));
   return url('home') + (q.length ? '?' + q.join('&') : '') + '#werk';
 }
@@ -247,8 +248,8 @@ R.home = function () {
   if (!f.status) list.sort(function (a, b) { return (forSale(b) ? 1 : 0) - (forSale(a) ? 1 : 0); });
   var ser = DATA.series.filter(function (s) { return s.id === f.reeks; })[0];
   var sl = '<div class="filters" role="group" aria-label="' + T.series + '">' +
-    '<a href="' + filterHref('', f.status) + '"' + (!f.reeks ? ' class="on" aria-current="true"' : '') + '>' + T.all + '</a>' +
-    DATA.series.map(function (s) { return '<a href="' + filterHref(s.id, f.status) + '"' + (f.reeks === s.id ? ' class="on" aria-current="true"' : '') + '>' + esc(tl(s)) + '</a>'; }).join('') + '</div>';
+    DATA.series.map(function (s) { return '<a href="' + filterHref(s.id, f.status) + '"' + (f.reeks === s.id ? ' class="on" aria-current="true"' : '') + '>' + esc(tl(s)) + '</a>'; }).join('') +
+    '<a href="' + filterHref('', f.status) + '"' + (!f.reeks ? ' class="on" aria-current="true"' : '') + '>' + T.allSeries + '</a></div>';
   var st = '<div class="filters" role="group" aria-label="Status">' +
     [['', T.all], ['te-koop', T.forSale], ['verkocht', T.sold]].map(function (x) {
       return '<a href="' + filterHref(f.reeks, x[0]) + '"' + (f.status === x[0] ? ' class="on" aria-current="true"' : '') + '>' + x[1] + '</a>';
@@ -260,7 +261,7 @@ R.home = function () {
   ];
   return '<section class="hero">' +
       '<div><p class="kicker">' + T.heroKick + '</p><h1 class="display">' + T.heroTitle + '</h1><p class="lede">' + T.heroLede + '</p>' +
-      '<div class="links"><a class="textlink" href="' + filterHref('', 'te-koop') + '">' + T.seeForSale + '</a><a class="textlink" href="' + url('commissions') + '">' + T.commission + '</a></div></div>' +
+      '<div class="links"><a class="textlink" href="' + filterHref(DATA.series[0].id, 'te-koop') + '">' + T.seeForSale + '</a><a class="textlink" href="' + url('commissions') + '">' + T.commission + '</a></div></div>' +
       '<figure class="hero-art"><a href="' + url('work', feat.slug) + '">' + img(feat, 0, '(max-width:860px) 90vw, 50vw', { alt: tl(feat.title), eager: true, src: 1200 }) + '</a>' +
       '<figcaption><a href="' + url('work', feat.slug) + '">' + esc(tl(feat.title)) + '</a>' + (feat.size ? ', ' + esc(feat.size) : '') + (forSale(feat) && feat.price ? '. ' + eur(feat.price) : '') + '</figcaption></figure>' +
     '</section>' +
@@ -407,8 +408,8 @@ var COM = {
 
 R.commissions = function () {
   var C = COM[L], c = DATA.contact;
-  var imgs = ['c00', 'c02', 'c03', 'c04', 'c05', 'c06', 'c07'];
-  return '<section class="hero"><div><p class="kicker">' + C.kick + '</p><h1 class="display">' + C.title + '</h1><p class="lede">' + C.lede + '</p>' +
+  var imgs = ['c00', 'c02', 'c03', 'c04', 'c05'];
+  return '<section class="hero"><div><img class="seal" src="/img/opdracht/zegel.webp" width="360" height="366" alt="Commissions by Staaf"><p class="kicker">' + C.kick + '</p><h1 class="display">' + C.title + '</h1><p class="lede">' + C.lede + '</p>' +
       '<div class="links"><a class="btn" href="#begin">' + C.start + '</a></div></div>' +
       '<figure class="hero-art"><img src="/img/opdracht/c01.webp" width="1100" height="786" alt="" fetchpriority="high"></figure></section>' +
     '<div class="section-head"><div class="row"><h2 class="h2">' + C.how + '</h2></div></div>' +
@@ -430,10 +431,9 @@ R.commissions = function () {
 
 R.about = function () {
   var c = DATA.contact;
-  var feat = work('abraham-me-reet') || WORKS[0];
   return '<div class="split over"><div><p class="kicker">Staaf · David de Winter</p><h1 class="display">' + T.aboutTitle + '</h1><div class="prose">' + T.about.map(function (p) { return '<p>' + p + '</p>'; }).join('') + '</div>' +
       '<div class="links" style="margin-top:28px"><a class="textlink" href="' + url('commissions') + '">' + T.commissionsLink + '</a><a class="textlink" href="https://www.daviddewinter.nl">' + T.directorLink + ' ↗</a></div></div>' +
-      '<figure class="hero-art" style="margin:0">' + img(feat, 0, '(max-width:860px) 90vw, 45vw', { alt: tl(feat.title), src: 1200 }) + '</figure></div>' +
+      '<figure class="portrait"><img src="/img/david.webp" width="525" height="820" alt="' + (L === 'en' ? 'David de Winter, alias Staaf' : 'David de Winter, alias Staaf') + '" fetchpriority="high"></figure></div>' +
     '<section class="split block mid"><div class="facts"><h2 class="h2">' + T.visit + '</h2><p class="lede">' + T.visitText + '</p>' +
       '<p><span class="label">Galerie Staaf</span><br>' + c.address.join('<br>') + '</p>' +
       '<p><span class="label">Contact</span><br><a href="mailto:' + c.email + '">' + c.email + '</a><br><a href="tel:' + c.tel + '">' + c.phone + '</a> · <a href="' + c.whatsapp + '">' + T.whatsapp + '</a></p>' +
