@@ -1,6 +1,6 @@
 // Beheer: alleen met ADMIN_PASSWORD (in Netlify ingesteld).
 import { createHash, timingSafeEqual } from 'node:crypto';
-import { currentState, getBasis, saveBasis, getSales, cleanPatch, loadData, images, printKey } from './lib/state.mjs';
+import { currentState, getBasis, saveBasis, getSales, cleanPatch, loadData, images } from './lib/state.mjs';
 
 const json = (status, body) => new Response(JSON.stringify(body), {
   status, headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' }
@@ -41,9 +41,8 @@ export default async (req) => {
     }
     if (body.prints && Object.keys(body.prints).length) {
       const next = { ...before.prints };
-      for (const p of data.prints) for (const v of p.variants) {
-        const k = printKey(p.slug, v.id);
-        if (k in body.prints) next[k] = Math.max(0, Math.min(999, parseInt(body.prints[k], 10) || 0));
+      for (const p of data.prints) {
+        if (p.slug in body.prints) next[p.slug] = Math.max(0, Math.min(999, parseInt(body.prints[p.slug], 10) || 0));
       }
       basis.prints = next; basis.printsAt = now;
     }

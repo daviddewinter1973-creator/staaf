@@ -109,7 +109,10 @@ for w in W:
                              'framed': framed, 'price': round(float(pr) * 100),
                              'stock': 50 if s == 'U' else int(s)})
         slug = slugify(nl)
-        prints.append({'slug': slug, 'title': {'nl': nl, 'en': en}, 'edition': 50,
+        # Eén oplage van 50 voor alle formaten en uitvoeringen samen.
+        sold = sum(50 - v['stock'] for v in variants)
+        for v in variants: del v['stock']
+        prints.append({'slug': slug, 'title': {'nl': nl, 'en': en}, 'edition': 50, 'stock': 50 - sold,
                        'images': files, 'variants': variants})
         continue
     available = st[0] not in (0, '0')

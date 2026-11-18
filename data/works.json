@@ -5365,54 +5365,49 @@
     "en": "Bloemstraat half past seven"
    },
    "edition": 50,
+   "stock": 49,
    "variants": [
     {
      "id": "a3-los",
      "format": "A3",
      "dims": "42 × 29,7 cm",
      "framed": false,
-     "price": 16400,
-     "stock": 49
+     "price": 16400
     },
     {
      "id": "a3-lijst",
      "format": "A3",
      "dims": "42 × 29,7 cm",
      "framed": true,
-     "price": 32000,
-     "stock": 50
+     "price": 32000
     },
     {
      "id": "a2-los",
      "format": "A2",
      "dims": "47,2 × 59 cm",
      "framed": false,
-     "price": 19800,
-     "stock": 50
+     "price": 19800
     },
     {
      "id": "a2-lijst",
      "format": "A2",
      "dims": "47,2 × 59 cm",
      "framed": true,
-     "price": 41000,
-     "stock": 50
+     "price": 41000
     },
     {
      "id": "a1-los",
      "format": "A1",
      "dims": "64 × 80 cm",
      "framed": false,
-     "price": 26400,
-     "stock": 50
+     "price": 26400
     },
     {
      "id": "a1-lijst",
      "format": "A1",
      "dims": "64 × 80 cm",
      "framed": true,
-     "price": 56000,
-     "stock": 50
+     "price": 56000
     }
    ],
    "pics": [
@@ -5429,54 +5424,49 @@
     "en": "Monday"
    },
    "edition": 50,
+   "stock": 48,
    "variants": [
     {
      "id": "a3-los",
      "format": "A3",
      "dims": "42 × 29,7 cm",
      "framed": false,
-     "price": 16400,
-     "stock": 49
+     "price": 16400
     },
     {
      "id": "a3-lijst",
      "format": "A3",
      "dims": "42 × 29,7 cm",
      "framed": true,
-     "price": 32000,
-     "stock": 50
+     "price": 32000
     },
     {
      "id": "a2-los",
      "format": "A2",
      "dims": "89 × 44,6 cm",
      "framed": false,
-     "price": 19800,
-     "stock": 50
+     "price": 19800
     },
     {
      "id": "a2-lijst",
      "format": "A2",
      "dims": "89 × 44,6 cm",
      "framed": true,
-     "price": 41000,
-     "stock": 50
+     "price": 41000
     },
     {
      "id": "a1-los",
      "format": "A1",
      "dims": "80 × 60 cm",
      "framed": false,
-     "price": 26400,
-     "stock": 49
+     "price": 26400
     },
     {
      "id": "a1-lijst",
      "format": "A1",
      "dims": "80 × 60 cm",
      "framed": true,
-     "price": 56000,
-     "stock": 50
+     "price": 56000
     }
    ],
    "pics": [
@@ -5493,54 +5483,49 @@
     "en": "Wrapped up Wester"
    },
    "edition": 50,
+   "stock": 50,
    "variants": [
     {
      "id": "a3-los",
      "format": "A3",
      "dims": "29,7 × 42 cm",
      "framed": false,
-     "price": 16400,
-     "stock": 50
+     "price": 16400
     },
     {
      "id": "a3-lijst",
      "format": "A3",
      "dims": "29,7 × 42 cm",
      "framed": true,
-     "price": 32000,
-     "stock": 50
+     "price": 32000
     },
     {
      "id": "a2-los",
      "format": "A2",
      "dims": "47,2 × 59 cm",
      "framed": false,
-     "price": 19800,
-     "stock": 50
+     "price": 19800
     },
     {
      "id": "a2-lijst",
      "format": "A2",
      "dims": "47,2 × 59 cm",
      "framed": true,
-     "price": 41000,
-     "stock": 50
+     "price": 41000
     },
     {
      "id": "a1-los",
      "format": "A1",
      "dims": "64 × 80 cm",
      "framed": false,
-     "price": 26400,
-     "stock": 50
+     "price": 26400
     },
     {
      "id": "a1-lijst",
      "format": "A1",
      "dims": "64 × 80 cm",
      "framed": true,
-     "price": 56000,
-     "stock": 50
+     "price": 56000
     }
    ],
    "pics": [

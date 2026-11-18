@@ -15,7 +15,7 @@ export async function loadData(origin) {
   return r.json();
 }
 
-export const printKey = (slug, variant) => `${slug}/${variant}`;
+// Prints: één oplage per print, voor alle formaten en uitvoeringen samen.
 
 export async function getBasis() {
   const b = await store().get('basis', { type: 'json' });
@@ -55,8 +55,7 @@ export async function currentState(origin, data) {
     for (const [kind, slug, variant, qty] of sale.items) {
       if (kind === 'work') { if (!lastSale[slug] || sale.at > lastSale[slug]) lastSale[slug] = sale.at; }
       else if (sale.at > basis.printsAt) {
-        const k = printKey(slug, variant);
-        soldPrints[k] = (soldPrints[k] || 0) + qty;
+        soldPrints[slug] = (soldPrints[slug] || 0) + qty;
       }
     }
   }
@@ -73,10 +72,9 @@ export async function currentState(origin, data) {
   }
 
   const prints = {};
-  for (const p of data.prints) for (const v of p.variants) {
-    const k = printKey(p.slug, v.id);
-    const base = basis.prints && typeof basis.prints[k] === 'number' ? basis.prints[k] : v.stock;
-    prints[k] = Math.max(0, base - (soldPrints[k] || 0));
+  for (const p of data.prints) {
+    const base = basis.prints && typeof basis.prints[p.slug] === 'number' ? basis.prints[p.slug] : p.stock;
+    prints[p.slug] = Math.max(0, base - (soldPrints[p.slug] || 0));
   }
   return { works, extra: basis.extra, prints, printsAt: basis.printsAt };
 }

@@ -1,6 +1,6 @@
 // Maakt een Mollie-betaling aan. Prijzen, status en voorraad komen altijd van de server.
 // Nodig in Netlify: MOLLIE_API_KEY.
-import { currentState, loadData, printKey, setHolds } from './lib/state.mjs';
+import { currentState, loadData, setHolds } from './lib/state.mjs';
 import '../../shipping.js';
 
 const json = (status, body) => new Response(JSON.stringify(body), {
@@ -44,12 +44,12 @@ export default async (req) => {
       const v = p && p.variants.find(x => x.id === l.variant);
       if (!v) return json(400, { error: T('Een van de prints bestaat niet meer. Vernieuw de pagina.', 'One of the prints no longer exists. Please refresh.') });
       const qty = Math.max(1, Math.min(10, parseInt(l.qty, 10) || 1));
-      const k = printKey(p.slug, v.id);
-      wanted[k] = (wanted[k] || 0) + qty;
-      const left = state.prints[k] ?? 0;
-      if (left < wanted[k]) return json(409, { error: left === 0
-        ? T(`${p.title.nl} (${v.format}) is uitverkocht.`, `${p.title.en} (${v.format}) is sold out.`)
-        : T(`Van ${p.title.nl} (${v.format}) zijn er nog ${left}.`, `Only ${left} left of ${p.title.en} (${v.format}).`) });
+      // Eén oplage voor alle formaten: tel alle regels van dezelfde print op.
+      wanted[p.slug] = (wanted[p.slug] || 0) + qty;
+      const left = state.prints[p.slug] ?? 0;
+      if (left < wanted[p.slug]) return json(409, { error: left === 0
+        ? T(`De print ${p.title.nl} is uitverkocht.`, `The print ${p.title.en} is sold out.`)
+        : T(`Van de print ${p.title.nl} zijn er nog ${left}.`, `Only ${left} left of the print ${p.title.en}.`) });
       lines.push({ kind: 'print', framed: v.framed, name: `Print ${p.title.nl}, ${v.format}${v.framed ? ' ingelijst' : ''}`, qty, price: v.price });
       meta.push(['print', p.slug, v.id, qty]);
       total += v.price * qty;

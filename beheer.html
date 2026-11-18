@@ -79,7 +79,7 @@
     </section>
 
     <section data-pane="prints" hidden>
-      <p class="note" style="margin:0 0 16px">Hoeveel prints er nog zijn, per formaat en uitvoering. Bij elke betaalde bestelling gaat het aantal vanzelf omlaag. Op de site is het aantal pas zichtbaar als er 10 of minder over zijn.</p>
+      <p class="note" style="margin:0 0 16px">Hoeveel prints er nog zijn. Eén oplage per print: A3, A2 en A1, los of ingelijst, tellen samen. Bij elke betaalde bestelling gaat het aantal vanzelf omlaag. Op de site is het aantal pas zichtbaar als er 10 of minder over zijn.</p>
       <div id="prints"></div>
     </section>
 
@@ -241,12 +241,10 @@ $('#save').onclick = function () {
 };
 
 function drawPrints() {
-  $('#prints').innerHTML = DATA.prints.map(function (p) {
-    return '<h2 class="h3" style="margin-top:22px">' + esc(p.title.nl) + '</h2><table><tbody>' + p.variants.map(function (v) {
-      var k = p.slug + '/' + v.id, n = k in PCH ? PCH[k] : ST.prints[k];
-      return '<tr class="' + (k in PCH ? 'changed' : '') + '"><td>' + v.format + ' · ' + (v.framed ? 'ingelijst' : 'los') + '</td><td class="s">€ ' + eur(v.price) + '</td><td style="width:140px"><input class="num" type="number" min="0" data-pk="' + k + '" value="' + n + '"></td></tr>';
-    }).join('') + '</tbody></table>';
-  }).join('');
+  $('#prints').innerHTML = '<table><tbody>' + DATA.prints.map(function (p) {
+    var k = p.slug, n = k in PCH ? PCH[k] : ST.prints[k];
+    return '<tr class="' + (k in PCH ? 'changed' : '') + '"><td><img src="/img/w/print-' + p.slug + '-0-600.webp" alt=""></td><td><div class="t">' + esc(p.title.nl) + '</div><div class="s">Oplage ' + p.edition + ', alle formaten en uitvoeringen samen</div></td><td style="width:140px"><input class="num" type="number" min="0" data-pk="' + k + '" value="' + n + '"></td></tr>';
+  }).join('') + '</tbody></table>';
 }
 function drawSales() {
   var s = ST.sales || [];

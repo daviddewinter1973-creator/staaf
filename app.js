@@ -158,11 +158,13 @@ function mergeLive() {
 }
 function work(slug) { return WORKS.filter(function (w) { return w.slug === slug; })[0]; }
 function printBy(slug) { return DATA.prints.filter(function (p) { return p.slug === slug; })[0]; }
-function stock(slug, v) {
-  if (LIVE && LIVE.prints) { var n = LIVE.prints[slug + '/' + v]; if (typeof n === 'number') return n; }
-  var p = printBy(slug); var x = p && p.variants.filter(function (q) { return q.id === v; })[0];
-  return x ? x.stock : 0;
+// Eén oplage per print, voor alle formaten en uitvoeringen samen.
+function stock(slug) {
+  if (LIVE && LIVE.prints) { var n = LIVE.prints[slug]; if (typeof n === 'number') return n; }
+  var p = printBy(slug);
+  return p ? p.stock : 0;
 }
+function inCartPrints(slug) { return CART.reduce(function (a, l) { return a + (l.kind === 'print' && l.slug === slug ? l.qty : 0); }, 0); }
 function seriesName(id) { var s = DATA.series.filter(function (x) { return x.id === id; })[0]; return s ? tl(s) : id; }
 function forSale(w) { return w.status === 'beschikbaar'; }
 
@@ -327,7 +329,7 @@ R.prints = function () {
   return '<section class="hero" style="margin-bottom:56px"><div><p class="kicker">' + T.printsKick + '</p><h1 class="display">' + T.printsTitle + '</h1><p class="lede">' + T.printsLede + '</p></div><div></div></section>' +
     '<div class="grid" style="grid-template-columns:repeat(3,1fr)">' + DATA.prints.map(function (p) {
       var min = Math.min.apply(null, p.variants.map(function (v) { return v.price; }));
-      var out = p.variants.every(function (v) { return stock(p.slug, v.id) <= 0; });
+      var out = stock(p.slug) <= 0;
       return '<a class="card" href="' + url('print', p.slug) + '"><div class="ph">' + img(p, 0, '(max-width:860px) 46vw, 30vw', { alt: tl(p.title), print: true, src: 1200 }) + (out ? '<span class="tag">' + T.soldOut + '</span>' : '') + '</div>' +
         '<h3>' + esc(tl(p.title)) + '</h3><p class="meta">Baryta fine art · A3, A2, A1<br><b>' + T.from + ' ' + eur(min) + '</b></p></a>';
     }).join('') + '</div>';
@@ -339,7 +341,7 @@ function printBuy(p) {
   var formats = [];
   p.variants.forEach(function (v) { if (formats.indexOf(v.format) < 0) formats.push(v.format); });
   var v = p.variants.filter(function (x) { return x.format === sel.format && x.framed === sel.framed; })[0];
-  var left = stock(p.slug, v.id);
+  var left = stock(p.slug);
   var h = '<fieldset class="opts"><legend class="label">' + T.format + '</legend><div class="optrow">' + formats.map(function (f) {
     var any = p.variants.filter(function (x) { return x.format === f; })[0];
     return '<label class="opt"><input type="radio" name="fmt" value="' + f + '"' + (f === sel.format ? ' checked' : '') + '><span>' + f + '<small>' + esc(any.dims) + '</small></span></label>';
@@ -461,7 +463,7 @@ function cartLines() {
     }
     var p = printBy(l.slug), v = p && p.variants.filter(function (x) { return x.id === l.variant; })[0];
     if (!v) return null;
-    return { i: i, l: l, item: p, print: true, title: tl(p.title), sub: T.print + ' ' + v.format + ' · ' + (v.framed ? T.framed : T.loose), price: v.price, ok: stock(p.slug, v.id) >= l.qty, href: url('print', p.slug), kind: 'print', framed: v.framed };
+    return { i: i, l: l, item: p, print: true, title: tl(p.title), sub: T.print + ' ' + v.format + ' · ' + (v.framed ? T.framed : T.loose), price: v.price, ok: stock(p.slug) >= inCartPrints(p.slug), href: url('print', p.slug), kind: 'print', framed: v.framed };
   }).filter(Boolean);
 }
 var SHIP = null;
